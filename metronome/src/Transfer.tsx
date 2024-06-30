@@ -8,19 +8,20 @@ function Transfer() {
   // read query param named songs that is a string
   const [searchParams] = useSearchParams();
   const [songs, setSongs] = useState<Song[]>([]);
-  const [error, setError] = useState();
+  const [error, setError] = useState<string>();
   const [readOk, setReadOk] = useState(false);
   const navigate = useNavigate();
 
   const transferUrl = searchParams.get("songs");
   const readTransferUrl = () => {
     try {
-      const readSongs = jsurl2.parse(transferUrl, true) as Song[];
+      const readSongs = jsurl2.parse(transferUrl || "") as Song[];
 
       setSongs(readSongs);
       setReadOk(true);
     } catch (e) {
-      setError(e.message);
+      const error = e as Error;
+      setError(error.message);
     }
   };
 
@@ -32,7 +33,8 @@ function Transfer() {
       localStorage.setItem("state", JSON.stringify(newState));
       navigate("/");
     } catch (e) {
-      setError(e.message);
+      const error = e as Error;
+      setError(error.message);
     }
   };
 
@@ -84,9 +86,7 @@ const RoundThumbUpIcon = ({ className }: { className?: string }) => (
     version="1.1"
     id="Capa_1"
     xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
     viewBox="0 0 50 50"
-    xml:space="preserve"
     className={className || "w-20 h-20"}
   >
     <circle style={{ fill: "#25AE88" }} cx="25" cy="25" r="25" />

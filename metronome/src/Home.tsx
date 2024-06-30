@@ -57,7 +57,8 @@ function Home() {
         setViewSongId(state.viewSongId);
         loaded.current = true;
       } catch (e) {
-        setError(e.message);
+        const error = e as Error;
+        setError(error.message);
       }
     }
   }, []);
@@ -66,7 +67,7 @@ function Home() {
     localStorage.setItem("state", JSON.stringify({ songs, lineParseRules, viewSongId, textInput }));
   }, [songs, lineParseRules, viewSongId, textInput]);
 
-  const addRule = (action: LineParserAction, relativeLineNumber?: number = lineParseRules.length + 1) => {
+  const addRule = (action: LineParserAction, relativeLineNumber: number = lineParseRules.length + 1) => {
     setLineParseRules([...lineParseRules, { action, relativeLineNumber }]);
   };
 
@@ -90,7 +91,7 @@ function Home() {
       let lineIndex = 0;
       let name = "";
       let tempo = 0;
-      const newSongs = [];
+      const newSongs: Song[] = [];
       const lineGroupSize = lineParseRules.length;
       for (const line of textInput.split("\n")) {
         const ruleIndex = lineIndex % lineGroupSize;
@@ -114,12 +115,13 @@ function Home() {
       }
       setSongs(newSongs);
     } catch (e) {
-      setError(e.message);
+      const error = e as Error;
+      setError(error.message);
     }
   };
 
   const copyTransferUrlToClipBoard = () => {
-    navigator.clipboard.writeText(transferUrl);
+    navigator.clipboard.writeText(transferUrl ?? "");
   };
 
   return (

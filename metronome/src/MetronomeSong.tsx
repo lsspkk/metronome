@@ -18,7 +18,8 @@ function MetronomeSong() {
         setSongs(state.songs || []);
         loaded.current = true;
       } catch (e) {
-        setError(e.message);
+        const error = e as Error;
+        setError(error.message);
       }
     }
   }, []);

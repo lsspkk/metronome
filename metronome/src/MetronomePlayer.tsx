@@ -40,8 +40,7 @@ export const MetronomePlayer = ({ song }: { song: Song }) => {
     setTempo(tempo - 1);
   };
 
-  const onSetTempo = (e: unknown) => {
-    console.debug(e.nativeEvent.target.value);
+  const onSetTempo = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTempo(parseInt(e.target.value));
   };
 
@@ -55,13 +54,11 @@ export const MetronomePlayer = ({ song }: { song: Song }) => {
   };
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: number;
     if (playing) {
       timeoutId = setTimeout(() => {
         setVisualNumber(visualNumber + 1);
       }, 60000 / tempo);
-    } else {
-      clearTimeout(timeoutId);
     }
     return () => clearTimeout(timeoutId);
   }, [playing, tempo, visualNumber]);
@@ -123,8 +120,8 @@ export const MetronomePlayer = ({ song }: { song: Song }) => {
 };
 
 export const TimeSignatureButton = ({ timeSignature, isSelected, className, ...props }:
-  & { timeSignature: 2 | 3 | 4; onClick: (timeSignature: 2 | 3 | 4) => void; isSelected: boolean; className: string }
-  & React.HTMLProps<HTMLButtonElement>) => (
+  & { timeSignature: 2 | 3 | 4; isSelected: boolean; className: string }
+  & React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     className={`${className} flex-grow border-8 rounded-lg ${
       isSelected ? "opacity-100 border-sky-800" : "opacity-50 border-sky-300"
