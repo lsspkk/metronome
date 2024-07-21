@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { Song } from './Home'
 import { PlayIcon } from './Icons'
 import { StopIcon } from './Icons'
-import { NpButton } from './NpButton'
+import { NpButton } from './components/NpButton'
+import { calculateColor } from './components/theme'
 
-export const MetronomePlayer = ({ song }: { song: Song }) => {
+export const MetronomePlayer = ({ song, index }: { song: Song; index: number }) => {
   const [tempo, setTempo] = useState<number>(song.tempo ?? 60)
   const [playing, setPlaying] = useState<boolean>(true)
   const [visualNumber, setVisualNumber] = useState<number>(0)
@@ -89,17 +90,19 @@ export const MetronomePlayer = ({ song }: { song: Song }) => {
         <div>{tempo}</div>
       </div>
       <button
-        className='flex flex-col items-center w-[50vh] h-[50vh] justify-center text-xl py-10 border-8 rounded-3xl bg-indigo-200'
+        className={`flex flex-col items-center w-[50vh] h-[50vh] max-w-[90vw] max-h-[90vw] justify-center text-xl py-10 border-8 rounded-3xl bg-indigo-200`}
         onClick={togglePlaying}
       >
-        {playing ? (
-          <StopIcon className='w-12 h-12 sm:w-24 sm:h-24' />
-        ) : (
-          <PlayIcon className='w-10 h-10 sm:w-24 sm:h-24' />
-        )}
+        <div className='p-2 pr-1 rounded-xl text-indigo-900'>
+          {playing ? (
+            <StopIcon className='w-20 h-20 sm:w-40 sm:h-40' />
+          ) : (
+            <PlayIcon className='w-20 h-20 sm:w-40 sm:h-40' />
+          )}
+        </div>
         <div className='flex flex-col gap-4 mt-2 sm:mt-2'>
           <div
-            className={`text-[10em] font-bold py-10 sm:py-20 ${
+            className={`text-[10em] font-bold py-20 sm:py-20 ${
               visualNumber % timeSignature === 0 ? 'text-indigo-900' : 'text-indigo-400'
             }`}
           >
@@ -107,7 +110,7 @@ export const MetronomePlayer = ({ song }: { song: Song }) => {
           </div>
         </div>
       </button>
-      <div className='flex w-full max-w-[50vh] gap-2 justify-stretch h-20 items-stretch'>
+      <div className='flex max-w-[90vw] w-[50vh] p-2 gap-2 justify-stretch h-20 items-stretch'>
         <TimeSignatureButton
           timeSignature={2}
           onClick={() => setTimeSignature(2)}
@@ -118,13 +121,13 @@ export const MetronomePlayer = ({ song }: { song: Song }) => {
           timeSignature={3}
           onClick={() => setTimeSignature(3)}
           isSelected={timeSignature === 3}
-          className='bg-cyan-500'
+          className='bg-cyan-400'
         />
         <TimeSignatureButton
           timeSignature={4}
           onClick={() => setTimeSignature(4)}
           isSelected={timeSignature === 4}
-          className='bg-cyan-700'
+          className='bg-cyan-500'
         />
       </div>
     </div>

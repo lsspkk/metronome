@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { CaretDownIcon, CaretUpIcon } from './Icons'
 import { NpButton } from './NpButton'
+import { CaretDownIcon, CaretUpIcon } from '../Icons'
 
 export const NpAccordeon = ({
   title,
