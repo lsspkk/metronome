@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Song } from './Home'
 import { MetronomePlayer } from './MetronomePlayer'
-import { NpButton } from './NpButton'
+import { NpButton } from './components/NpButton'
 
 function MetronomeSong() {
   const id = useParams().id
@@ -43,7 +43,7 @@ function MetronomeSong() {
               &lt;
             </NpButton>
             <div className='text-sm'>
-              Song {index + 1} / {songs.length}
+              {index + 1} / {songs.length}
             </div>
             <NpButton
               onClick={() => navigate(`/metronome/song/${songs[index + 1]?.id || ''}`)}
@@ -64,7 +64,7 @@ function MetronomeSong() {
               <p>Song Tempo: {song.tempo}</p>
             </div>
 
-            <MetronomePlayer song={song} />
+            <MetronomePlayer song={song} index={index} />
           </div>
         )}
       </div>
