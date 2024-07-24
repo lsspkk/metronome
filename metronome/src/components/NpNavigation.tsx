@@ -1,57 +1,86 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { NpButton } from './NpButton'
-import { CaretUpIcon, CaretDownIcon } from '../Icons'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { MenuIcon } from "../Icons";
+import { NpButton } from "./NpButton";
 
 export type MenuItem = {
-  name: string
-  path: string
-  icon?: React.ReactNode
-  selected?: boolean
-}
+  name: string;
+  path: string;
+  icon?: React.ReactNode;
+  selected?: boolean;
+};
+
+const defaultMenuItems: MenuItem[] = [
+  { name: "Songs", path: "/" },
+  { name: "Metronome", path: "/metronome" },
+  { name: "Import Text", path: "/import-text" },
+  { name: "Import Url", path: "/import-url" },
+  { name: "Export Url", path: "/export-url" },
+];
 
 export const NpNavigation = ({
   title,
   children,
   defaultOpen,
-  menuItems,
+  menuItems = defaultMenuItems,
 }: {
-  title: string
-  children?: React.ReactNode
-  defaultOpen?: boolean
-  menuItems: MenuItem[]
+  title: string;
+  children?: React.ReactNode;
+  defaultOpen?: boolean;
+  menuItems?: MenuItem[];
 }) => {
-  const [open, setOpen] = useState(defaultOpen)
-  const navigate = useNavigate()
+  const [open, setOpen] = useState(defaultOpen);
+  const navigate = useNavigate();
+  const pathname = window.location.pathname;
+
+  const isSelected = (path: string) => {
+    return (pathname === "" && (path === "/" || path === ""))
+      || pathname === path || isMetronomeSongSelected(path);
+  };
+
+  const isMetronomeSongSelected = (path: string) => {
+    return;
+    path.startsWith("/metronome")
+      && pathname.startsWith("/metronome/song");
+  };
 
   return (
-    <div>
-      <div className='flex flex-col gap-1 w-full bg-gray-100 p-4 rounded border'>
-        <h3 className='font-bold text-left flex-grow'>{title}</h3>
+    <>
+      <div className="top-0 fixed left-0 h-14 z-10 flex gap-1 w-full bg-gray-100 pl-4 pr-1 py-1 sm:py-3 border shadow mb-2 sm:mb-4">
+        <h3 className="font-bold text-left flex-grow w-full">{title}</h3>
         <NpButton
-          className='opacity-50 py-0 px-2'
+          className="rounded-bl opacity-50 py-0 mt-[1px] px-0 mb-[4px] bg-gray-900"
           onClick={() => {
-            setOpen(!open)
+            setOpen(!open);
           }}
         >
-          {open ? <CaretUpIcon className='w-2 h-5 py-1' /> : <CaretDownIcon className='w-2 h-5 py-[2px]' />}
+          {open
+            ? <MenuIcon className="w-10 h-11 -m-2 -mt-[6px] opacity-30 bg-opacity-30" />
+            : <MenuIcon className="w-10 h-11 -m-2 -mt-[6px]" />}
         </NpButton>
       </div>
 
       {open && (
-        <div className='flex flex-col gap-2 w-full items-stretch border-t-2 mt-2 sm:mt-3 pt-2 sm:pt-4'>
-          {menuItems?.map(({ name, path, icon, selected }) => (
-            <div className='flex items-center gap-2' key={name}>
-              <NpButton onClick={() => navigate(path)} className='flex-grow'>
-                {icon}
-                {name}
-              </NpButton>
-              {selected && <div className='w-2 h-2 bg-green-500 rounded-full' />}
-            </div>
-          ))}
+        <div className="z-10 fixed h-full w-full top-0" onClick={() => setOpen(false)}>
+          <div className="z-20 fixed top-14 max-h-[90vh] overflow-auto pb-20 sm:mt-16 bg-white shadow-xl flex flex-col gap-2 w-full items-center border-t-2  p-4">
+            {menuItems?.map(({ name, path, icon }) => (
+              <ul className="flex items-center gap-1 w-40" key={name}>
+                <li
+                  onClick={() => navigate(path)}
+                  className={`cursor-pointer flex-grow flex gap-2 text-xl w-full items-center hover:bg-gray-300 p-2 ${
+                    isSelected(path) ? "opacity-20" : ""
+                  }`}
+                  role="button"
+                >
+                  {icon}
+                  {name}
+                </li>
+              </ul>
+            ))}
+          </div>
         </div>
       )}
       {children}
-    </div>
-  )
-}
+    </>
+  );
+};
