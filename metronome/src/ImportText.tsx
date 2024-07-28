@@ -3,7 +3,7 @@ import { NpButton } from "./components/NpButton";
 import { NpNavigation } from "./components/NpNavigation";
 import { LineParserAction, LineParseRule, Song } from "./types";
 
-const createShortId = (songs: Song[]) => {
+export const createShortId = (songs: Song[]) => {
   let counter = 0;
   while (counter < 1000) {
     const id = Math.random().toString(36).substring(2, 5);
@@ -62,7 +62,6 @@ export function ImportText() {
         const ruleIndex = lineIndex % lineGroupSize;
         const rule = lineParseRules[ruleIndex];
         if (!rule) {
-          console.debug(lineParseRules, lineIndex, lineGroupSize, ruleIndex, line);
           setError(`No rule for line ${lineIndex}`);
           return;
         }
@@ -86,7 +85,7 @@ export function ImportText() {
   };
 
   return (
-    <div className="flex flex-col items-center mb-10 mt-16 max-w-sm mx-2">
+    <NpLayout>
       <NpNavigation title="Import Songs from Text" />
 
       <div className="flex flex-col gap-4 sm:mw-10/12 md:w-8/12 lg:w-6/12">
@@ -124,6 +123,6 @@ export function ImportText() {
           ))}
         </div>
       </div>
-    </div>
+    </NpLayout>
   );
 }

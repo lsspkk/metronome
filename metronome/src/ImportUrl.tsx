@@ -1,35 +1,48 @@
-import * as jsurl2 from "jsurl2";
-import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { NpButton } from "./components/NpButton";
+import { NpNavigation } from "./components/NpNavigation";
+import { createShortId } from "./ImportText";
 import { Song } from "./types";
+import { NpLayout } from "./components/NpLayout"
 
 function ImportUrl() {
   // read query param named songs that is a string
-  const [searchParams] = useSearchParams();
   const [songs, setSongs] = useState<Song[]>([]);
   const [error, setError] = useState<string>();
   const [readOk, setReadOk] = useState(false);
   const navigate = useNavigate();
 
-  const transferUrl = searchParams.get("songs");
-  const readTransferUrl = () => {
+  useEffect(() => {
     try {
-      const readSongs = jsurl2.parse(transferUrl || "") as Song[];
+      const queryString = window.location.search;
+      const ssongs = new URLSearchParams(queryString).get("songs");
+      if (!ssongs) {
+        return;
+      }
+      const lines = decodeURIComponent(ssongs).split("\n");
+      const readSongs: Song[] = [];
+
+      for (const line of lines) {
+        const parts = line.split("|");
+        readSongs.push({ id: createShortId(readSongs), name: parts[0], tempo: parseInt(parts[1]) });
+      }
 
       setSongs(readSongs);
       setReadOk(true);
     } catch (e) {
       const error = e as Error;
+      console.error(e);
       setError(error.message);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const useAndGoHome = () => {
     try {
       const state = localStorage.getItem("state") || "{}";
       const newState = JSON.parse(state);
-      newState.songs = songs;
+      newState["songs"] = songs;
       localStorage.setItem("state", JSON.stringify(newState));
       navigate("/");
     } catch (e) {
@@ -39,22 +52,30 @@ function ImportUrl() {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen max-h-screen justify-between bg-gray-300">
-      <div className="flex flex-col gap-4 sm:w-10/12 md:w-9/12 lg:w-6/12">
+    <NpLayout>
+      <NpNavigation title="Import Url" />
+      <div className="flex flex-col gap-4 sm:max-w-sm lg:max-w-md">
         {error && (
           <div className="bg-red-300 w-full p-8 flex justify-between">
             <div>{error}</div>
             <button onClick={() => setError("")}>X</button>
           </div>
         )}
-        <h3 className="mt-6">Read Songs from Transfer url</h3>
+
+        <p
+          style={{ overflowWrap: "break-word" }}
+          className="w-full bg-slate-50 p-2 max-h-[30vh] overflow-y-scroll text-xs whitespace-break-spaces"
+        >
+          {window.location.search}
+        </p>
+
+        <h3 className="mt-8">Read Songs from Transfer url</h3>
+
+        <p className="text-sm">
+          If you have a transfer url, copy paste it to the browser location to see what songs and tempos it contains.
+        </p>
 
         <div className="flex flex-col gap-2">
-          {!transferUrl && "No transfer url created yet"}
-          {transferUrl && <input type="text" disabled value={transferUrl} />}
-
-          <NpButton onClick={readTransferUrl}>Read</NpButton>
-
           {readOk && (
             <div className="bg-white shadow-sm rounded w-full p-8 flex justify-between flex-col gap-5">
               <div className="flex items-center gap-4 align-self-center self-center">
@@ -69,7 +90,8 @@ function ImportUrl() {
 
           <h3 className="mt-6">Transferred Songs</h3>
           <div className="flex flex-col gap-1 items-start text-xs">
-            {songs.map((song) => (
+            {!songs || songs.length === 0 && <p>No songs</p>}
+            {songs?.map((song) => (
               <div key={song.id} className="flex w-full text-xs justify-between gap-2">
                 <div className="flex-grow">{song.name}</div>
                 <div>{song.tempo}</div>
@@ -78,7 +100,7 @@ function ImportUrl() {
           </div>
         </div>
       </div>
-    </div>
+      </NpLayout>
   );
 }
 

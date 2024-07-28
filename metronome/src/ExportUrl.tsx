@@ -1,8 +1,6 @@
-import { compatto } from "compatto";
-import { dictionary } from "compatto/dictionary";
-import * as jsurl2 from "jsurl2";
 import { useEffect, useRef, useState } from "react";
 import { NpButton } from "./components/NpButton";
+import { NpLayout } from "./components/NpLayout";
 import { NpNavigation } from "./components/NpNavigation";
 import { Song } from "./types";
 
@@ -16,9 +14,12 @@ function ExportUrl() {
     if (!loaded.current) {
       try {
         const state = JSON.parse(localStorage.getItem("state") || "{}");
-        setSongs(state.songs || []);
+
+        if (state.songs) {
+          setSongs(state.songs);
+          createTransferUrl(state.songs);
+        }
         loaded.current = true;
-        createTransferUrl();
       } catch (e) {
         const error = e as Error;
         setError(error.message);
@@ -26,21 +27,11 @@ function ExportUrl() {
     }
   }, []);
 
-  function toHex(buffer: Uint8Array) {
-    return Array.prototype.map.call(buffer, (x) => x.toString(16).padStart(2, "0")).join("");
-  }
-  const createTransferUrl = () => {
+  const createTransferUrl = (songs: Song[]) => {
     const cleanedSongs = songs.map((song) => {
       return song.name + "|" + song.tempo;
     });
     const encodedUrl = encodeURIComponent(cleanedSongs.join("\n"));
-    const transferSongs = jsurl2.stringify(cleanedSongs);
-    const { compress } = compatto({ dictionary });
-    const compressedUrl = compress(transferSongs);
-    const uint8Array = new Uint8Array(compressedUrl);
-    const hexString = toHex(uint8Array);
-
-    console.log(transferSongs.length, compressedUrl.length, hexString.length);
     setTransferUrl(`${window.location.origin}/transfer?songs=${encodedUrl}`);
   };
 
@@ -49,7 +40,7 @@ function ExportUrl() {
   };
 
   return (
-    <div className="flex flex-col items-center mt-16 mb-10 ">
+    <NpLayout>
       <NpNavigation title="Songs" />
 
       <div className="flex flex-col gap-4 max-w-sm w-full">
@@ -71,7 +62,7 @@ function ExportUrl() {
         {songs.length > 0 && (
           <>
             <div className="flex flex-col gap-5 bg-gray-200 p-5 my-10">
-              <NpButton onClick={createTransferUrl}>Create a Transfer Url</NpButton>
+              <NpButton onClick={() => createTransferUrl(songs)}>ReCreate a Transfer Url</NpButton>
 
               {!transferUrl && "No transfer url created yet"}
               {transferUrl && (
@@ -106,7 +97,7 @@ function ExportUrl() {
           </div>
         </div>
       ))}
-    </div>
+    </NpLayout>
   );
 }
 
