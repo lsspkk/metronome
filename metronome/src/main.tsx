@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Songs from "./Home.tsx";
+import Songs from "./Songs.tsx";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ExportUrl from "./ExportUrl.tsx";

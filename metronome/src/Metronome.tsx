@@ -10,7 +10,7 @@ function Metronome() {
         <div className="flex w-full justify-between mt-2">
           <h1>Metronome</h1>
           <div className="flex gap-2">
-            <NpButton className="ml-4" onClick={() => navigate(-1)}>
+            <NpButton className="ml-4" onClick={() => navigate("/")}>
               Back
             </NpButton>
           </div>

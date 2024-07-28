@@ -46,28 +46,29 @@ export const NpNavigation = ({
 
   return (
     <>
-      <div className="top-0 fixed left-0 h-14 z-10 flex gap-1 w-full bg-gray-100 pl-4 pr-1 py-1 sm:py-3 border shadow mb-2 sm:mb-4">
+      <div className="top-0 fixed left-0 h-14 sm:h-18 z-10 flex gap-1 w-full bg-gray-100 pl-4 pr-1 py-1 border shadow mb-2">
         <h3 className="font-bold text-left flex-grow w-full">{title}</h3>
         <NpButton
-          className="rounded-bl opacity-50 py-0 mt-[1px] px-0 mb-[4px] bg-gray-900"
+          className="rounded-bl bg-transparent hover:bg-slate-300 opacity-50 py-0 mt-[1px] px-0 mb-[4px] text-gray-900"
           onClick={() => {
             setOpen(!open);
           }}
         >
           {open
             ? <MenuIcon className="w-10 h-11 -m-2 -mt-[6px] opacity-30 bg-opacity-30" />
-            : <MenuIcon className="w-10 h-11 -m-2 -mt-[6px]" />}
+            : <MenuIcon className="w-10 h-11 -m-2 -mt-[6px] text-gray-900" />}
         </NpButton>
       </div>
 
       {open && (
         <div className="z-10 fixed h-full w-full top-0" onClick={() => setOpen(false)}>
-          <div className="z-20 fixed top-14 max-h-[90vh] overflow-auto pb-20 sm:mt-16 bg-white shadow-xl flex flex-col gap-2 w-full items-center border-t-2  p-4">
+          <div className="z-20 fixed top-14 sm:top-18 max-h-[90vh] overflow-auto pb-20 bg-white shadow-xl flex flex-col gap-2 w-full items-center border-t-2  p-4">
             {menuItems?.map(({ name, path, icon }) => (
-              <ul className="flex items-center gap-1 w-40" key={name}>
+              <ul className="flex items-center gap-1 w-full max-w-sm" key={name}>
                 <li
-                  onClick={() => navigate(path)}
-                  className={`cursor-pointer flex-grow flex gap-2 text-xl w-full items-center hover:bg-gray-300 p-2 ${
+                  onClick={() =>
+                    navigate(path)}
+                  className={`cursor-pointer flex-grow flex gap-2 text-xl w-full items-center hover:bg-gray-200 p-2 ${
                     isSelected(path) ? "opacity-20" : ""
                   }`}
                   role="button"

@@ -2,13 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import { NpButton } from "./components/NpButton";
 import { PlayIcon } from "./Icons";
 import { StopIcon } from "./Icons";
+import { Sound} from "./types"
 
-export const MetronomePlayer = ({ defaultTempo = 120 }: { defaultTempo: number }) => {
+export const SOUNDS: Sound[] = [
+  { id: "NO_SOUND", name: "No Sound", url: "" },
+   { id: "DRUMSTICK", name: "DrumSticks", url: "/drumstick.wav" },
+   { id: "QUACK", name: "Quack", url: "/drumstick.ogg" },
+];
+
+
+export const MetronomePlayer = ({ defaultTempo = 120, defaultPlaying = true }: { defaultTempo: number,
+  defaultPlaying: boolean
+ }) => {
   const [tempo, setTempo] = useState<number>(defaultTempo);
   const [playing, setPlaying] = useState<boolean>(true);
   const [visualNumber, setVisualNumber] = useState<number>(0);
   const [timeSignature, setTimeSignature] = useState<2 | 3 | 4>(4);
+  const [sound, setSound] = useState<Sound>(SOUNDS[0])();
   const loaded = useRef(false);
+  const audioRef = useRef();
 
   useEffect(() => {
     if (!loaded.current) {
@@ -17,6 +29,9 @@ export const MetronomePlayer = ({ defaultTempo = 120 }: { defaultTempo: number }
         if (timeSignature) {
           setTimeSignature(parseInt(timeSignature) as 2 | 3 | 4);
         }
+        const loadedSound = localStorage.getItem("soundId") || 'NO_SOUND'
+        setSound(SOUNDS.find(id === soundId) || SOUNDS[0])
+
       } catch (e) {
         console.error(e);
       }
@@ -31,6 +46,14 @@ export const MetronomePlayer = ({ defaultTempo = 120 }: { defaultTempo: number }
       console.error(e);
     }
   }, [timeSignature]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("soundId", sound.id);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [sound.id]);
 
   const onIncrease = () => {
     setTempo(tempo + 1);
@@ -57,6 +80,11 @@ export const MetronomePlayer = ({ defaultTempo = 120 }: { defaultTempo: number }
     if (playing) {
       timeoutId = setTimeout(() => {
         setVisualNumber(visualNumber + 1);
+        if (sound.id !== "NO_SOUND" && audioRef.current) {
+          audioRef.current.play
+
+        }
+
       }, 60000 / tempo);
     }
     return () => clearTimeout(timeoutId);
@@ -84,20 +112,27 @@ export const MetronomePlayer = ({ defaultTempo = 120 }: { defaultTempo: number }
         <div>{tempo}</div>
       </div>
       <button
-        className={`flex flex-col items-center w-[50vh] h-[50vh] max-w-[90vw] max-h-[90vw] justify-center text-xl py-10 border-8 rounded-3xl bg-indigo-200`}
+        className={`flex flex-col items-center w-[50vh] h-[50vh] 
+          max-w-[90vw] max-h-[90vw] justify-center text-xl border-8 rounded-3xl bg-indigo-200
+          transform active:scale-95 transition-transform duration-300
+          `}
         onClick={togglePlaying}
       >
-        <div className="-mt-[2vh] rounded-xl text-indigo-900 flex gap-0 sm:gap-2">
+        <div className="-mt-18 md:-mt-20 rounded-xl text-indigo-900 flex gap-0 sm:gap-2">
           <PlayIcon
-            className={`-mr-2 w-20 h-20 sm:w-40 sm:h-40 p-3 pt-2 md:p-6 md:pt-5 ${playing ? "opacity-50" : ""}`}
+            className={`-mr-2 sm:-mt-2 lg:-mt-4 w-20 h-20  sm:w-40 sm:h-40 max-w-[14vh] 
+              p-3 pt-2 md:p-3 md:pt-5 ${playing ? "opacity-50" : ""}
+            `}
           />
-          <StopIcon className={`-ml-2 w-20 h-20 sm:w-40 sm:h-40 ${playing ? "" : "opacity-50"}`} />
+          <StopIcon
+            className={`-ml-2 sm:-mt-1 lg:-mt-2 w-20 h-20 sm:w-40 sm:h-40 max-w-[14vh] ${playing ? "" : "opacity-50"}
+          `}
+          />
         </div>
         <div className="flex flex-col mt-2 sm:mt-2">
           <div
-            className={`text-[10em] font-bold py-12 sm:py-[4vh] md:py-[4vh] ${
-              visualNumber % timeSignature === 0 ? "text-indigo-900" : "text-indigo-400"
-            }`}
+            className={`text-[8em] sm:text-[12em] font-bold py-12 sm:pt-[4vh] md:pt-[4vh] 
+              ${visualNumber % timeSignature === 0 ? "text-indigo-900" : "text-indigo-400"}`}
           >
             {(visualNumber % timeSignature) + 1}
           </div>
@@ -123,6 +158,15 @@ export const MetronomePlayer = ({ defaultTempo = 120 }: { defaultTempo: number }
           className="bg-cyan-500"
         />
       </div>
+      <div className="flex max-w-[90vw] w-[50vh] p-2 gap-2 justify-stretch h-20 items-stretch">
+        <SoundSelectButton sound={SOUNDS[0]} isSelected={SOUNDS[0].id === sound.id} onClick={() => setSound(SOUNDS[0])} className="bg-indigo-300" />
+        <SoundSelectButton sound={SOUNDS[1]} isSelected={SOUNDS[1].id === sound.id} onClick={() => setSound(SOUNDS[1])} className="bg-indigo-400" />
+        <SoundSelectButton sound={SOUNDS[2]} isSelected={SOUNDS[2].id === sound.id} onClick={() => setSound(SOUNDS[2])} className="bg-indigo-500" />
+        </div>
+
+        <div className=" hidden">
+              <audio ref={audioRef} src={sound.url} />
+        </div>
     </div>
   );
 };
@@ -140,9 +184,34 @@ export const TimeSignatureButton = ({
   <button
     className={`${className} flex-grow border-8 rounded-xl text-lg ${
       isSelected ? "opacity-100 border-sky-800" : "opacity-50 border-sky-300"
-    }`}
+    } transform active:scale-75 transition-transform duration-300
+`}
     {...props}
   >
     {timeSignature}/4
   </button>
 );
+
+
+export const SoundSelectButton = ({
+  sound,
+  isSelected,
+  className,
+  ...props
+}: {
+  sound: Sound;
+  isSelected: boolean;
+  className: string;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+  <button
+    className={`${className} border-8 rounded-xl text-lg ${
+      isSelected ? "opacity-100 border-sky-800" : "opacity-50 border-sky-300"
+    } transform active:scale-75 transition-transform duration-300
+`}
+    {...props}
+  >
+    {sound.name}
+  </button>
+);
+})
+

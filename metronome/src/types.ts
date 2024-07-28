@@ -14,3 +14,9 @@ export type State = {
   viewSongId?: string;
 };
 export type LineParserAction = "NAME" | "TEMPO" | "SKIP";
+
+export type Sound = {
+  id: "NO_SOUND" | "DRUMSTICK" | "QUACK";
+  name: string;
+  url: string;
+};

@@ -1,9 +1,7 @@
-import { compatto } from "compatto";
-import { dictionary } from "compatto/dictionary";
-import * as jsurl2 from "jsurl2";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NpButton } from "./components/NpButton";
+import { NpLayout } from "./components/NpLayout";
 import { NpNavigation } from "./components/NpNavigation";
 import { calculateColor } from "./components/theme";
 import { PlayIcon } from "./Icons";
@@ -18,7 +16,6 @@ function Songs() {
   const [viewSongId, setViewSongId] = useState<string>();
   const loaded = useRef(false);
   const [error, setError] = useState<string>();
-  const [transferUrl, setTransferUrl] = useState<string>();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,26 +43,8 @@ function Songs() {
     navigate(`/metronome/song/${id}`);
   };
 
-  function toHex(buffer: Uint8Array) {
-    return Array.prototype.map.call(buffer, (x) => x.toString(16).padStart(2, "0")).join("");
-  }
-  const createTransferUrl = () => {
-    const transferSongs = jsurl2.stringify(songs);
-    const { compress } = compatto({ dictionary });
-    const compressedUrl = compress(transferSongs);
-    const uint8Array = new Uint8Array(compressedUrl);
-    const hexString = toHex(uint8Array);
-
-    console.log(transferSongs.length, compressedUrl.length, hexString.length);
-    setTransferUrl(`${window.location.origin}/transfer?songs=${hexString}`);
-  };
-
-  const copyTransferUrlToClipBoard = () => {
-    navigator.clipboard.writeText(transferUrl ?? "");
-  };
-
   return (
-    <div className="flex flex-col items-center mb-10 mt-2">
+    <NpLayout>
       <NpNavigation title="Songs" />
 
       <div className="flex flex-col gap-4 sm:mw-10/12 md:w-8/12 lg:w-6/12">
@@ -78,12 +57,16 @@ function Songs() {
 
         {songs.length === 0
           && (
-            <div className="flex flex-col">
-              <div className="bg-green-700 bg-opacity-30 p-2 sm:p-8">
-                Import list of songs from text or transfer url.
-
-                <MetronomePlayer defaultTempo={120} />
+            <div className="flex flex-col sm:w-10/12 md:w-9/12 lg:w-6/12 self-center gap-2 md:gap-4">
+              <div className="text-xs">
+                This metronome saves a list of songs or dances to browser's local storage. You can import a list of
+                songs from text or transfer url.
               </div>
+              <div className="text-gray-400">
+                Enjoy the simple metronome.
+              </div>
+
+              <MetronomePlayer defaultTempo={120} defaultPlaying={false} />
             </div>
           )}
         {songs.map((song, index) => (
@@ -103,19 +86,8 @@ function Songs() {
             </NpButton>
           </div>
         ))}
-
-        <div className="flex flex-col gap-5 bg-gray-200 p-5 my-10">
-          <NpButton onClick={createTransferUrl}>Create a Transfer Url</NpButton>
-
-          {!transferUrl && "No transfer url created yet"}
-          {transferUrl && <input type="text" disabled value={transferUrl} />}
-
-          <NpButton className="align-self-end" onClick={copyTransferUrlToClipBoard}>
-            Copy
-          </NpButton>
-        </div>
       </div>
-    </div>
+    </NpLayout>
   );
 }
 
