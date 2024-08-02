@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { NpButton } from './components/NpButton'
 import { NpNavigation } from './components/NpNavigation'
-import { LineParserAction, LineParseRule, Song } from './types'
+import { LineParserAction, LineParseRule, Song, TimeSignature } from './types'
 import { NpLayout } from './components/NpLayout'
 
 export const createShortId = (songs: Song[]) => {
@@ -52,6 +52,20 @@ export function ImportText() {
     setLineParseRules(lineParseRules.filter((_, i) => i !== index))
   }
 
+  const parseTimeSignature = (line: string): TimeSignature => {
+    const ts = parseInt(line)
+    if ([2, 3, 4].includes(ts)) {
+      return ts as TimeSignature
+    }
+    if (line === '2/4') {
+      return 2
+    }
+    if (line === '3/4') {
+      return 3
+    }
+    return 4
+  }
+
   const loadSongs = () => {
     try {
       let lineIndex = 0
@@ -62,6 +76,7 @@ export function ImportText() {
       for (const line of textInput.split('\n')) {
         const ruleIndex = lineIndex % lineGroupSize
         const rule = lineParseRules[ruleIndex]
+        let timeSignature: TimeSignature = 4
         if (!rule) {
           setError(`No rule for line ${lineIndex}`)
           return
@@ -70,12 +85,14 @@ export function ImportText() {
           name = line
         } else if (rule.action === 'TEMPO') {
           tempo = parseInt(line)
+        } else if (rule.action === 'TIMESIGNATURE') {
+          timeSignature = parseTimeSignature(line)
         } else if (rule.action === 'SKIP') {
           // Skip
         }
         lineIndex++
         if (lineIndex % lineGroupSize === 0) {
-          newSongs.push({ id: createShortId(newSongs), name, tempo })
+          newSongs.push({ id: createShortId(newSongs), name, tempo, timeSignature })
         }
       }
       setSongs(newSongs)
@@ -112,6 +129,7 @@ export function ImportText() {
         <div className='flex flex-row gap-4'>
           <NpButton onClick={() => addRule('NAME')}>Name</NpButton>
           <NpButton onClick={() => addRule('TEMPO')}>Tempo</NpButton>
+          <NpButton onClick={() => addRule('TIMESIGNATURE')}>TimeSignature</NpButton>
           <NpButton onClick={() => addRule('SKIP')}>Skip</NpButton>
         </div>
         <div className='flex flex-col gap-2 text-xs'>

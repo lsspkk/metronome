@@ -27,7 +27,7 @@ export type State = {
   textInput: string
   viewSongId?: string
 }
-export type LineParserAction = 'NAME' | 'TEMPO' | 'SKIP'
+export type LineParserAction = 'NAME' | 'TEMPO' | 'TIMESIGNATURE' | 'SKIP'
 
 export type Sound = {
   id: 'NO_SOUND' | 'DRUMSTICK' | 'QUACK'
