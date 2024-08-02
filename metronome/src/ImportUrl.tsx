@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { NpButton } from './components/NpButton'
 import { NpNavigation } from './components/NpNavigation'
 import { createShortId } from './ImportText'
-import { Song } from './types'
+import { Song, TimeSignature } from './types'
 import { NpLayout } from './components/NpLayout'
 
 function ImportUrl() {
@@ -25,7 +25,14 @@ function ImportUrl() {
 
       for (const line of lines) {
         const parts = line.split('|')
-        readSongs.push({ id: createShortId(readSongs), name: parts[0], tempo: parseInt(parts[1]) })
+        const rawTs = parts.length === 3 ? parseInt(parts[2]) : 4
+        const timeSignature = ([2, 3, 4].includes(rawTs) ? rawTs : 4) as TimeSignature
+        readSongs.push({
+          id: createShortId(readSongs),
+          name: parts[0],
+          tempo: parseInt(parts[1]),
+          timeSignature,
+        })
       }
 
       setSongs(readSongs)

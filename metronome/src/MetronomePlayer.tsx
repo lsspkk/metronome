@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react'
 import { NpButton } from './components/NpButton'
 import { DrumIcon, DuckIcon, PlayIcon } from './Icons'
 import { StopIcon } from './Icons'
-import { Sound } from './types'
+import { Sound, TimeSignature } from './types'
 import { useAudioStore } from './store/audioStore'
 
 export const SOUNDS: Sound[] = [
@@ -14,14 +14,18 @@ export const SOUNDS: Sound[] = [
 export const MetronomePlayer = ({
   defaultTempo = 120,
   defaultPlaying = true,
+  defaultTimeSignature = 4,
+  saveTimeSignature,
 }: {
   defaultTempo: number
   defaultPlaying?: boolean
+  defaultTimeSignature?: TimeSignature
+  saveTimeSignature?: (timeSignature: TimeSignature) => void
 }) => {
   const [tempo, setTempo] = useState<number>(defaultTempo)
   const [playing, setPlaying] = useState<boolean>(defaultPlaying)
   const [visualNumber, setVisualNumber] = useState<number>(0)
-  const [timeSignature, setTimeSignature] = useState<2 | 3 | 4>(4)
+  const [timeSignature, setTimeSignature] = useState<2 | 3 | 4>(defaultTimeSignature)
   const [sound, setSound] = useState<Sound>(SOUNDS[0])
   const loaded = useRef(false)
   const { engine, initAudio } = useAudioStore()
@@ -40,17 +44,14 @@ export const MetronomePlayer = ({
       }
     }
   }, [])
+
   useEffect(() => {
     setTempo(defaultTempo)
   }, [defaultTempo])
 
   useEffect(() => {
-    try {
-      localStorage.setItem('timeSignature', timeSignature.toString())
-    } catch (e) {
-      console.error(e)
-    }
-  }, [timeSignature])
+    setTimeSignature(defaultTimeSignature)
+  }, [defaultTimeSignature])
 
   useEffect(() => {
     try {
@@ -62,6 +63,14 @@ export const MetronomePlayer = ({
 
   const onSetTempo = (newTempo: number) => {
     setTempo(newTempo)
+  }
+  const onSetTimeSignature = (newTimeSignature: TimeSignature) => {
+    setTimeSignature(newTimeSignature)
+    if (saveTimeSignature) {
+      saveTimeSignature(newTimeSignature)
+    } else {
+      localStorage.setItem('timeSignature', newTimeSignature.toString())
+    }
   }
 
   const togglePlaying = () => {
@@ -136,19 +145,19 @@ export const MetronomePlayer = ({
       <div className='flex max-w-[90vw] w-[50vh] p-2 gap-2 justify-stretch h-20 items-stretch'>
         <TimeSignatureButton
           timeSignature={2}
-          onClick={() => setTimeSignature(2)}
+          onClick={() => onSetTimeSignature(2)}
           isSelected={timeSignature === 2}
           className='bg-cyan-300'
         />
         <TimeSignatureButton
           timeSignature={3}
-          onClick={() => setTimeSignature(3)}
+          onClick={() => onSetTimeSignature(3)}
           isSelected={timeSignature === 3}
           className='bg-cyan-400'
         />
         <TimeSignatureButton
           timeSignature={4}
-          onClick={() => setTimeSignature(4)}
+          onClick={() => onSetTimeSignature(4)}
           isSelected={timeSignature === 4}
           className='bg-cyan-500'
         />
@@ -222,7 +231,7 @@ export const SoundSelectButton = ({
   icon?: React.ReactNode
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
-    className={`${className} flex-grow border-8 rounded-xl text-lg ${
+    className={`${className} ${icon !== undefined ? 'text-xs' : 'text-current'} flex-grow border-8 rounded-xl ${
       isSelected ? 'opacity-100 border-indigo-800' : 'opacity-50 border-indigo-300'
     } transform active:scale-75 transition-transform duration-300
     flex justify-center gap-2 items-center
